@@ -1,6 +1,10 @@
 <template>
   <FormCard class="mt-10">
-    <form @submit.prevent="submit" class="w-full pt-10 px-10 w-full">
+    <form
+      @submit.prevent="submit"
+      class="w-full pt-10 px-10 w-full"
+      encType="multipart/form-data"
+    >
       <div class="w-full md:flex md:space-x-14">
         <div class="w-full">
           <MainInput
@@ -32,12 +36,16 @@
             id="candidate_location"
             name="Candidate location"
             valueName="country"
+            :values="countries"
+            :field="countryField"
           />
 
           <RegistrationSelect
             id="position"
             name="Position"
             valueName="position"
+            :values="positions"
+            :field="positionField"
           />
 
           <div class="w-full mt-5">
@@ -77,7 +85,7 @@
         </div>
 
         <div class="w-full">
-          <RegistrationFileInput v-model="cv" />
+          <RegistrationFileInput :field="cvField" />
         </div>
       </div>
 
@@ -91,7 +99,6 @@
       </div>
     </form>
   </FormCard>
-
   <div
     class="w-full h-screen fixed flex items-center justify-center rounded-lg"
     v-if="modalOpened"
@@ -143,6 +150,8 @@ import FormCard from "@/components/forms/formCard.vue";
 import "@/formValidation/registrationValidators.js";
 import { reactive, watch, computed } from "vue";
 import { useField, useForm } from "vee-validate";
+import axios from "axios";
+import FormData from "form-data";
 
 export default {
   data() {
@@ -189,6 +198,12 @@ export default {
 
     const phoneNumberField = reactive(useField("phoneNumber", "phoneNumber"));
 
+    const countryField = reactive(useField("countries", "countries"));
+
+    const positionField = reactive(useField("positions", "positions"));
+
+    const cvField = reactive(useField("cv", "cv"));
+
     return {
       usernameField,
       emailField,
@@ -196,6 +211,9 @@ export default {
       confirmationPasswordField,
       fullNameField,
       phoneNumberField,
+      countryField,
+      positionField,
+      cvField,
       submitForm,
       formMeta,
     };
@@ -236,16 +254,54 @@ export default {
       }
     },
     addSkill(skill, id) {
-      console.log(skill, id);
       this.skills.push({ skill, id });
       this.resultQuery.splice({ id, skill }, 1);
-      console.log(this.resultQuery);
     },
     removeSkill(id, skill) {
       this.skills.splice(skill.id, 1);
       this.resultQuery.push({ id: id, skill: skill });
     },
-    submit() {},
+    async submit() {
+      if (this.formMeta.valid) {
+        const candidateSkills = [];
+
+        this.skills.forEach((skill) => {
+          candidateSkills.push(skill);
+        });
+
+        console.log(this.cvField.value.value[0]);
+
+        const signup = new FormData();
+        signup.append("username", this.usernameField.value.value);
+        signup.append("email", this.emailField.value.value);
+        signup.append("password", this.passwordField.value.value);
+        signup.append("full_name", this.fullNameField.value.value);
+        signup.append("phone_number", this.phoneNumberField.value.value);
+        signup.append("candidate_location", this.countryField.value.value);
+        signup.append("position", this.positionField.value.value);
+        signup.append("skills", JSON.stringify(candidateSkills));
+        signup.append("cv", this.cvField.value.value[0]);
+
+        try {
+          await axios.get(`${process.env.VUE_APP_PATH}/sanctum/csrf-cookie`, {
+            withCredentials: true,
+          });
+          const candidate = await axios.post(
+            `${process.env.VUE_APP_API_PATH}/signup`,
+            signup,
+            {
+              withCredentials: true,
+            }
+          );
+          console.log("new candidate", candidate.data);
+        } catch (error) {
+          console.log("error", error);
+          this.error = error;
+        }
+      } else {
+        console.log(this.formMeta.valid);
+      }
+    },
   },
 };
 </script>

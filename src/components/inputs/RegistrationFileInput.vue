@@ -13,13 +13,36 @@
               class="rounded-lg bg-pink-600 text-white px-8 py-3 cursor-pointer"
             >
               <span class="uppercase">CHOOSE FILE TO UPLOAD</span>
-              <input id="cv" name="cv" type="file" class="sr-only" />
+              <input
+                id="cv"
+                name="cv"
+                type="file"
+                class="sr-only"
+                :value="field.value.value"
+                @input="field.handleChange"
+                @blur="field.handleBlur"
+              />
             </label>
           </div>
 
           <p class="text-xs text-gray-500">PDF, WORD</p>
         </div>
+        <p class="h-3">
+          <small v-if="field.meta.touched && !field.meta.valid">
+            {{ field.errorMessage }}
+          </small>
+        </p>
       </div>
     </div>
   </div>
 </template>
+
+<script>
+export default {
+  props: {
+    field: {
+      type: Object,
+    },
+  },
+};
+</script>

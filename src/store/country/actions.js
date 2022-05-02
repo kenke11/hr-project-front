@@ -7,6 +7,7 @@ export default {
         `${process.env.VUE_APP_API_PATH}/countries`
       );
       let response = await countries.data;
+
       context.commit("updateCountries", response);
     } catch (error) {
       console.error(error);

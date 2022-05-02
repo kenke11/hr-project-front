@@ -52,3 +52,26 @@ defineRule("phoneNumber", (value) => {
 
   return "A valid phone number is required";
 });
+
+defineRule("positions", (value) => {
+  if (required(value)) {
+    return true;
+  }
+
+  return "this position is required";
+});
+
+defineRule("countries", (value) => {
+  if (required(value)) {
+    return true;
+  }
+
+  return "this country is required";
+});
+
+defineRule("cv", (value) => {
+  if (required(value)) {
+    return true;
+  }
+  return "this cv is required";
+});

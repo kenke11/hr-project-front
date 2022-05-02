@@ -11,15 +11,16 @@
       :id="id"
       :class="{ 'border-red-500': selectValidity === 'invalid' }"
       class="w-full bg-none border-2 border-gray-300 rounded-md focus:outline-none focus:border-blue-800 focus:decoration-blue-800 focus:ring-2 h-10 px-4 py-2 mt-2"
-      :value="modelValue"
-      @input="updateValue"
+      :value="field.value.value"
+      @input="field.handleChange"
+      @blur="field.handleBlur"
     >
       <option :value="null" hidden></option>
       <option
         v-for="value in values"
         :key="value.id"
         class="px-4"
-        :value="value.code"
+        :value="value[valueName]"
       >
         {{ value[valueName] }}
       </option>
@@ -39,10 +40,6 @@ export default {
       type: String,
       default: "",
     },
-    type: {
-      type: String,
-      default: "text",
-    },
     name: {
       type: String,
       default: "",
@@ -51,16 +48,15 @@ export default {
       type: String,
       default: "",
     },
-    selectValidity: {
-      type: String,
-      default: "isValid",
-    },
     values: {
       type: Array,
     },
     valueName: {
       type: String,
       default: "name",
+    },
+    field: {
+      type: Object,
     },
   },
   prop: ["value"],
